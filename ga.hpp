@@ -17,19 +17,9 @@
 #include <cstdio>
 #include <math.h> 
 
+// cellular automaton
+#include "ca_engine.hpp"
 
-template <int length>
-int hamming(std::bitset<length> &a, std::bitset<length> &b) {
-	std::bitset<length> diff;
-	diff |= a;
-	diff ^= b;
-	int score = 0;
-	for (int i = 0; i < length; ++i)
-	{
-		score += diff[i];
-	}
-	return score;
-}
 
 #define fitness_T float
 
@@ -52,17 +42,18 @@ public:
 	} 
 };
 
+// ----------------------------------------------------------------------------
 
-template <int genome_size> class CA_Genome;
-template <int genome_size> std::ostream& operator<<(std::ostream& os, const CA_Genome<genome_size> &g);
+
+template <int genome_size> class Simple_Genome;
+template <int genome_size> std::ostream& operator<<(std::ostream& os, const Simple_Genome<genome_size> &g);
 
 template <int genome_size>
-class CA_Genome : public Genome 
+class Simple_Genome : public Genome 
 {
-protected:
+public:
 	std::bitset<genome_size> sequence;
 
-public:
 	void mutate() {
 		float mutation_frequency = 0.1;
 		int mutations = mutation_frequency * genome_size;
@@ -78,7 +69,7 @@ public:
 		return (float) hamming<genome_size>(sequence, target);
 	}
 
-	CA_Genome recombine(CA_Genome partner) {
+	Simple_Genome recombine(Simple_Genome partner) {
 		std::bitset<genome_size> seq;
 		for (int i = 0; i < genome_size/2; ++i)
 		{
@@ -88,29 +79,48 @@ public:
 		{
 			seq.set(i,partner.sequence[i]);
 		}
-		return CA_Genome(seq);
+		return Simple_Genome(seq);
 	}
 
-	template <int gs> friend std::ostream& operator<<(std::ostream& os, const CA_Genome<gs> &i);
+	template <int gs> friend std::ostream& operator<<(std::ostream& os, const Simple_Genome<gs> &i);
 
 
-	CA_Genome(std::bitset<genome_size> seq) {
-		sequence = seq;
-	}	
-	CA_Genome() {
+	Simple_Genome() {
 		for (int i = 0; i < genome_size; ++i)
 		{
 			sequence.set(i,rand()%2);	
 		} 
 	}
+	Simple_Genome(std::bitset<genome_size> seq) {
+		sequence = seq;
+	}	
 };
 
 template <int genome_size> 
-std::ostream& operator<<(std::ostream& os, const CA_Genome<genome_size> &g){
+std::ostream& operator<<(std::ostream& os, const Simple_Genome<genome_size> &g){
     os << "[" << g.sequence << "]" << std::endl;
     return os;
 }
 
+// ----------------------------------------------------------------------------
+
+
+template <int genome_size>
+class CA_Genome : public Simple_Genome<genome_size> {
+public:
+	float fitness() {
+		std::bitset<genome_size> target;
+		return (float) run_ca<genome_size>(this->sequence, target);
+	}
+
+	CA_Genome(Simple_Genome<genome_size> g) { 
+		this->sequence = g.sequence;
+	}
+	CA_Genome(std::bitset<genome_size> seq) : Simple_Genome<genome_size>(seq) { }
+	CA_Genome() : Simple_Genome<genome_size>() { }
+};
+
+// ----------------------------------------------------------------------------
 
 
 template <class genome_T>
@@ -135,17 +145,24 @@ public:
 		}
 	}
 	void generation() {
+		for (int i = 0; i < pool_size; ++i) 
+		{
+			pool[i].mutate();
+		}
+
 		std::partial_sort(pool.begin(), pool.begin() + generation_size, pool.end());
 
 		for (int i = generation_size; i < pool_size; ++i)
 		{
-			int male_j   = rand() * generation_size / RAND_MAX;
-			int female_j = rand() * generation_size / RAND_MAX;
+			int male_j   = rand() % generation_size;
+			int female_j = rand() % generation_size;
 
 			genome_T male   = pool[male_j];
 			genome_T female = pool[female_j];
 
-			pool[i] = (genome_T) male.recombine(female);
+			// std::cout << male_j << "," << female_j << std::endl;
+
+			pool[i] = static_cast<genome_T>(male.recombine(female));
 		}
 		generation_counter++;
 	};
@@ -157,7 +174,7 @@ public:
 	}
 
 	bool stop() {
-		return generation_counter > 10;
+		return generation_counter > 100;
 	}
 
 
