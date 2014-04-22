@@ -38,7 +38,7 @@ int main ( )
 
 // n is the columns
 
-  n = 250;
+  n = 100;
 
 // step_num are the rows
   
@@ -47,20 +47,21 @@ int main ( )
   x = new char[n+2];
   x_old = new char[n+2];
 
-  for ( i = 0; i <= n + 1; i++ )
+//   for ( i = 0; i <= n + 1; i++ )
+//   {
+//     x[i] = '0';
+//   }
+
+
+
+// //  initial condition
+//   x[n-1] = '1';
+
+  string xp = "1101101011001001110111000110101100100001010011101011110111110110011101001001110101001111001000001110";
+  for (int i = 0; i < n; ++i)
   {
-    x[i] = '0';
+    x[i] = xp[i];
   }
-
-
-
-//  initial condition
-  x[n-1] = '1';
-
-
-
-
-
 
 
   for ( i = 1; i <= n; i++ )
