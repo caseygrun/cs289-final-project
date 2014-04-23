@@ -26,7 +26,7 @@ int hamming(std::bitset<length> &a, std::bitset<length> &b)
 }
 
 template <int genome_size>
-int run_ca (std::bitset<genome_size> x, std::bitset<genome_size> target)
+std::bitset<genome_size> run_ca (std::bitset<genome_size> x, bool chatter=false)
 {
   int i;
   int j;
@@ -91,10 +91,19 @@ int run_ca (std::bitset<genome_size> x, std::bitset<genome_size> target)
 
   std::cout << x << std::endl;
 
+  return x;
 
-  //
-  // check edit distance 
-  //
-  return hamming(x, target);
+}
 
+
+template <int genome_size>
+int run_ca_evaluate(std::bitset<genome_size> x, std::bitset<genome_size> target) {
+    
+    // run CA 
+    x = run_ca(x);
+
+    //
+    // check edit distance 
+    //
+    return hamming(x, target);
 }

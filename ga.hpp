@@ -18,10 +18,12 @@
 #include <math.h> 
 
 // cellular automaton
-#include "ca_engine.hpp"
+#include "ca_engine.cpp"
 
 
 #define fitness_T float
+
+// ----------------------------------------------------------------------------
 
 class Genome {
 protected:
@@ -54,6 +56,10 @@ class Simple_Genome : public Genome
 public:
 	std::bitset<genome_size> sequence;
 
+	virtual std::bitset<genome_size> phenotype() {
+		return sequence;
+	}
+
 	void mutate() {
 		float mutation_frequency = 0.1;
 		int mutations = mutation_frequency * genome_size;
@@ -64,9 +70,10 @@ public:
 		}
 	}
 
-	float fitness() {
+	fitness_T fitness(std::bitset<genome_size> pt) {
 		std::bitset<genome_size> target;
-		return (float) hamming<genome_size>(sequence, target);
+		this->_fitness = (fitness_T) hamming<genome_size>(pt, target);
+		return this->_fitness;
 	}
 
 	Simple_Genome recombine(Simple_Genome partner) {
@@ -108,9 +115,8 @@ std::ostream& operator<<(std::ostream& os, const Simple_Genome<genome_size> &g){
 template <int genome_size>
 class CA_Genome : public Simple_Genome<genome_size> {
 public:
-	float fitness() {
-		std::bitset<genome_size> target;
-		return (float) run_ca<genome_size>(this->sequence, target);
+	virtual std::bitset<genome_size> phenotype() {
+		return run_ca<genome_size>(this->sequence,/* chatter */false);
 	}
 
 	CA_Genome(Simple_Genome<genome_size> g) { 
@@ -127,7 +133,7 @@ template <class genome_T>
 class GeneticAlgorithm {
 protected:
 	std::vector<genome_T> pool;
-	std::vector<float> fitness;
+	std::vector<fitness_T> fitness;
 
 	// How many genomes should be contained in the population
 	int pool_size;
@@ -145,13 +151,24 @@ public:
 		}
 	}
 	void generation() {
+
+		// mutate each genome in the gene pool
 		for (int i = 0; i < pool_size; ++i) 
 		{
 			pool[i].mutate();
 		}
 
+		// evaluate fitness
+		for (int i = 0; i < pool_size; ++i)
+		{
+			pool[i].fitness(pool[i].phenotype());
+		}
+
+		// sort the first `generation_size` elements in order of increasing
+		// fitness according to the > operator
 		std::partial_sort(pool.begin(), pool.begin() + generation_size, pool.end());
 
+		// allow the top `generation_size` elements to recombine
 		for (int i = generation_size; i < pool_size; ++i)
 		{
 			int male_j   = rand() % generation_size;
