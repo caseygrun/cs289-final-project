@@ -16,25 +16,33 @@
 #include <cassert>
 #include <cstdio>
 #include <math.h> 
+#include <climits>
 
 // cellular automaton
 #include "ca_engine.cpp"
 
 
 #define fitness_T float
+#define lifetime_T long
+#define DEATH_FITNESS INT_MIN
 
 // ----------------------------------------------------------------------------
 
 class Genome {
 protected:
+	// keeps track of the fitness of the genome
 	fitness_T _fitness;
 
 
 public: 
-	// virtual void mutate();
-	// virtual Genome recombine();
 
-	// virtual fitness_T fitness();
+	// keeps track of the number of GA cycles that the genome has lived
+	lifetime_T age;
+
+	// assigns the genome the lowest possible fitness
+	void kill() {
+		_fitness = DEATH_FITNESS;
+	}
 
 	inline bool operator< (const Genome& rhs) const {
 		return (_fitness < rhs._fitness);
@@ -42,6 +50,10 @@ public:
 	inline bool operator> (const Genome& rhs) const {
 		return rhs < *this; 
 	} 
+
+	Genome() {
+		age = 0;
+	}
 };
 
 // ----------------------------------------------------------------------------
@@ -135,13 +147,20 @@ protected:
 	std::vector<genome_T> pool;
 	std::vector<fitness_T> fitness;
 
-	// How many genomes should be contained in the population
+	// how many genomes should be contained in the population
 	int pool_size;
 
-	// The number of genomes that should be preserved in each generation
-	int generation_size;
+	// the number of genomes that should be preserved in each generation
+	int max_generation_size;
 
+	// number of generations elapsed
 	int generation_counter;
+
+	// number of generations to run
+	int max_generations;
+
+	// maximum lifetime of a genome
+	lifetime_T max_lifetime;
 
 public:
 	void initialize() {
@@ -152,16 +171,24 @@ public:
 	}
 	void generation() {
 
-		// mutate each genome in the gene pool
+		// number of species that will be allowed to survive
+		int generation_size = max_generation_size;
+
+		// mutate and age each genome in the gene pool
 		for (int i = 0; i < pool_size; ++i) 
 		{
 			pool[i].mutate();
+			pool[i].age++;
 		}
 
 		// evaluate fitness
 		for (int i = 0; i < pool_size; ++i)
 		{
-			pool[i].fitness(pool[i].phenotype());
+			if(pool[i].age > max_lifetime) {
+				pool[i].kill();
+			} else {
+				pool[i].fitness(pool[i].phenotype());
+			}
 		}
 
 		// sort the first `generation_size` elements in order of increasing
@@ -177,8 +204,6 @@ public:
 			genome_T male   = pool[male_j];
 			genome_T female = pool[female_j];
 
-			// std::cout << male_j << "," << female_j << std::endl;
-
 			pool[i] = static_cast<genome_T>(male.recombine(female));
 		}
 		generation_counter++;
@@ -191,9 +216,8 @@ public:
 	}
 
 	bool stop() {
-		return generation_counter > 100;
+		return generation_counter > max_generations;
 	}
-
 
 	void print_candidates() {
 		std::vector<genome_T> c = candidates();
@@ -204,8 +228,10 @@ public:
 		}
 	}
 	
-	GeneticAlgorithm(int _ps = 100, int _gs = 50) : pool_size(_ps), generation_size(_gs), pool(_ps), fitness(_ps) {
+	GeneticAlgorithm(int _ps = 100, int _gs = 50) : pool_size(_ps), max_generation_size(_gs), pool(_ps), fitness(_ps) {
 		generation_counter = 0;
+		max_lifetime = 10;
+		max_generations = 100;
 	}
 };
 

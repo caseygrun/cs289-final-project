@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
 	ga.initialize();
 
 	do {
-		ga.print_candidates();
+		// ga.print_candidates();
 		ga.generation();
 		std::cout << "------------------------------------------------------------" << std::endl;
 	} while(!ga.stop());

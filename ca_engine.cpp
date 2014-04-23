@@ -11,6 +11,16 @@
 #include <cstdio>
 #include <math.h> 
 
+template <int genome_size> 
+void print_bitset(std::ostream& os, const std::bitset<genome_size> &seq){
+    for (int i = 0; i < genome_size; ++i)
+    {
+      os << (seq[i] ? "#" : "_");
+    }
+    // return os;
+}
+
+
 template <int length>
 int hamming(std::bitset<length> &a, std::bitset<length> &b) 
 {
@@ -43,7 +53,9 @@ std::bitset<genome_size> run_ca (std::bitset<genome_size> x, bool chatter=false)
 
   std::bitset<genome_size> x_old;
 
-  std::cout << x << "\t";
+  // std::cout << x << "\t";
+  print_bitset<genome_size>(std::cout, x);
+  std::cout << "\t->\t";
 
   // for ( i = 0; i <= n + 1; i++ )
   // {
@@ -89,7 +101,9 @@ std::bitset<genome_size> run_ca (std::bitset<genome_size> x, bool chatter=false)
 
   }
 
-  std::cout << x << std::endl;
+  // std::cout << x << std::endl;
+  print_bitset<genome_size>(std::cout, x);
+  std::cout << std::endl;
 
   return x;
 
