@@ -6,6 +6,7 @@
 
 // C++ standard libraries
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <map>
 #include <algorithm>
@@ -67,6 +68,7 @@ class Simple_Genome : public Genome
 {
 public:
 	std::bitset<genome_size> sequence;
+	std::bitset<genome_size> target;
 
 	virtual std::bitset<genome_size> phenotype() {
 		return sequence;
@@ -83,8 +85,7 @@ public:
 	}
 
 	fitness_T fitness(std::bitset<genome_size> pt) {
-		std::bitset<genome_size> target;
-		this->_fitness = (fitness_T) hamming<genome_size>(pt, target);
+		this->_fitness = (fitness_T) -hamming<genome_size>(pt, this->target);
 		return this->_fitness;
 	}
 
@@ -102,6 +103,12 @@ public:
 	}
 
 	template <int gs> friend std::ostream& operator<<(std::ostream& os, const Simple_Genome<gs> &i);
+	std::ostream& print_genotype(std::ostream& os) {
+		return print_bitset_tsv<genome_size>(os, sequence);
+	}
+	std::ostream& print_phenotype(std::ostream& os) {
+		return print_bitset_tsv<genome_size>(os, phenotype());
+	}
 
 
 	Simple_Genome() {
@@ -187,13 +194,13 @@ public:
 			if(pool[i].age > max_lifetime) {
 				pool[i].kill();
 			} else {
-				pool[i].fitness(pool[i].phenotype());
+				fitness[i] = pool[i].fitness(pool[i].phenotype());
 			}
 		}
 
-		// sort the first `generation_size` elements in order of increasing
-		// fitness according to the > operator
-		std::partial_sort(pool.begin(), pool.begin() + generation_size, pool.end());
+		// sort the first `generation_size` elements in order of decreasing
+		// fitness, according to the > operator
+		std::partial_sort(pool.begin(), pool.begin() + generation_size, pool.end(), std::greater<genome_T>());
 
 		// allow the top `generation_size` elements to recombine
 		for (int i = generation_size; i < pool_size; ++i)
@@ -211,12 +218,31 @@ public:
 	std::vector<genome_T> candidates() {
 		return pool;
 	}
-	std::vector<float> fitnesses() {
+	std::vector<fitness_T> fitnesses() {
 		return fitness;
 	}
 
 	bool stop() {
 		return generation_counter > max_generations;
+	}
+
+	void print_fitness_stats() {
+		fitness_T mean;
+		fitness_T var;
+		fitness_T sum = 0;
+		fitness_T sum2 = 0;
+		fitness_T max = fitness[0];
+		fitness_T min = fitness[0];
+		for (int i = 0; i < fitness.size(); i++)
+		{
+			sum += fitness[i];
+			sum2 += fitness[i]*fitness[i];
+			max = fitness[i] > max ? fitness[i] : max; 
+			min = fitness[i] < min ? fitness[i] : min; 
+		}
+		mean = sum * 1.0 / fitness.size();
+		var = sum2 * 1.0 / fitness.size() - mean * mean;
+		std::cout << "Mean: " << mean << "\tVar: " << var << "\tMax: " << max << "\tMin: " << min << std::endl;
 	}
 
 	void print_candidates() {
@@ -227,7 +253,34 @@ public:
 			std::cout << c[i];
 		}
 	}
+
+	void print_genotypes(std::string filename) {
+	    std::ofstream of(filename, std::ios::out);
+		for (int i = 0; i < pool.size(); ++i)
+		{
+			pool[i].print_genotype(of); 
+		}
+	    of.close(); 
+	}
 	
+	void print_phenotypes(std::string filename) {
+	    std::ofstream of(filename, std::ios::out);
+		for (int i = 0; i < pool.size(); ++i)
+		{
+			pool[i].print_phenotype(of); 
+		}
+	    of.close(); 
+	}
+
+	void print_fitnesses(std::string filename) {
+	    std::ofstream of(filename, std::ios::out);
+		for (int i = 0; i < fitness.size(); ++i)
+		{
+			of << fitness[i] << std::endl; 
+		}
+	    of.close(); 
+	}
+
 	GeneticAlgorithm(int _ps = 100, int _gs = 50) : pool_size(_ps), max_generation_size(_gs), pool(_ps), fitness(_ps) {
 		generation_counter = 0;
 		max_lifetime = 10;
