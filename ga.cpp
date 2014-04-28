@@ -18,15 +18,15 @@ int main(int argc, char* argv[]) {
 	std::srand(std::time(0));
 
 	// make find output directory
-	std::string output_dir;
-	if(argc > 0) {
+	std::string output_dir = "";
+	if(argc > 1) {
 		output_dir = std::string(argv[1]);
 	} else {
-		output_dir = std::string("./");
+		output_dir.assign("./");
 	}
 
-
-	GeneticAlgorithm< CA_Genome<base_genome_size> > ga;
+	// set the target state of the CA here
+	GeneticAlgorithm< CA_Genome<base_genome_size> > ga("0001000100010001000");
 	ga.initialize();
 
 	int generation = 0;

@@ -118,12 +118,23 @@ public:
 			sequence.set(i,rand()%2);	
 		} 
 	}
+	Simple_Genome(std::string targ) {
+		target = std::bitset<genome_size>(targ);
+		for (int i = 0; i < genome_size; ++i)
+		{
+			sequence.set(i,rand()%2);	
+		} 
+	}
 	Simple_Genome(std::bitset<genome_size> seq) {
 		sequence = seq;
 	}	
 	Simple_Genome(std::bitset<genome_size> seq, std::bitset<genome_size> targ) {
 		sequence = seq;
 		target = targ;
+	}	
+	Simple_Genome(std::bitset<genome_size> seq, std::string targ) {
+		sequence = seq;
+		target = std::bitset<genome_size>(targ);
 	}	
 
 };
@@ -147,9 +158,12 @@ public:
 	CA_Genome(Simple_Genome<genome_size> g) { 
 		this->sequence = g.sequence;
 	}
+	CA_Genome() : Simple_Genome<genome_size>() { }
+	CA_Genome(std::string targ) : Simple_Genome<genome_size>(targ) { }
 	CA_Genome(std::bitset<genome_size> seq) : Simple_Genome<genome_size>(seq) { }
 	CA_Genome(std::bitset<genome_size> seq, std::bitset<genome_size> targ) : Simple_Genome<genome_size>(seq, targ) { }
-	CA_Genome() : Simple_Genome<genome_size>() { }
+	CA_Genome(std::bitset<genome_size> seq, std::string targ) : Simple_Genome<genome_size>(seq, targ) { }
+	
 };
 
 // ----------------------------------------------------------------------------
@@ -160,6 +174,7 @@ class GeneticAlgorithm {
 protected:
 	std::vector<genome_T> pool;
 	std::vector<fitness_T> fitness;
+	std::string target;
 
 	// how many genomes should be contained in the population
 	int pool_size;
@@ -178,9 +193,14 @@ protected:
 
 public:
 	void initialize() {
+
 		for (int i = 0; i < pool_size; ++i)
 		{
-			pool[i] = genome_T();
+			if(target.length() > 0) {
+				pool[i] = genome_T(target);
+			} else {
+				pool[i] = genome_T();
+			}
 		}
 	}
 
@@ -296,6 +316,13 @@ public:
 		max_lifetime = 10;
 		max_generations = 100;
 	}
+
+	GeneticAlgorithm(std::string targ, int _ps = 100, int _gs = 50) : pool_size(_ps), max_generation_size(_gs), pool(_ps), fitness(_ps), target(targ) {
+		generation_counter = 0;
+		max_lifetime = 10;
+		max_generations = 100;
+	}
+
 };
 
 
