@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
 
 		ga.print_genotypes(genotype_filename.str());
 		ga.print_phenotypes(phenotype_filename.str());
-		ga.print_fitnesses(phenotype_filename.str());
+		ga.print_fitnesses(fitness_filename.str());
 
 		ga.print_fitness_stats();
 		std::cout << "------------------------------------------------------------" << std::endl;

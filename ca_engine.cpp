@@ -114,8 +114,8 @@ std::bitset<genome_size> run_ca (std::bitset<genome_size> x, bool chatter=false)
         //  Enforce periodic boundary conditions.
         //
         // uncomment to turn on
-        //    x[0] = x[n];
-        //    x[n+1] = x[1];
+        x[0] = x[n];
+        x[n+1] = x[1];
 
     }
 

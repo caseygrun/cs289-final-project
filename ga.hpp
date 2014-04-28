@@ -99,7 +99,8 @@ public:
 		{
 			seq.set(i,partner.sequence[i]);
 		}
-		return Simple_Genome(seq);
+		Simple_Genome offspring(seq, target);
+		return offspring;
 	}
 
 	template <int gs> friend std::ostream& operator<<(std::ostream& os, const Simple_Genome<gs> &i);
@@ -120,6 +121,11 @@ public:
 	Simple_Genome(std::bitset<genome_size> seq) {
 		sequence = seq;
 	}	
+	Simple_Genome(std::bitset<genome_size> seq, std::bitset<genome_size> targ) {
+		sequence = seq;
+		target = targ;
+	}	
+
 };
 
 template <int genome_size> 
@@ -142,6 +148,7 @@ public:
 		this->sequence = g.sequence;
 	}
 	CA_Genome(std::bitset<genome_size> seq) : Simple_Genome<genome_size>(seq) { }
+	CA_Genome(std::bitset<genome_size> seq, std::bitset<genome_size> targ) : Simple_Genome<genome_size>(seq, targ) { }
 	CA_Genome() : Simple_Genome<genome_size>() { }
 };
 
@@ -176,6 +183,7 @@ public:
 			pool[i] = genome_T();
 		}
 	}
+
 	void generation() {
 
 		// number of species that will be allowed to survive
@@ -259,6 +267,7 @@ public:
 		for (int i = 0; i < pool.size(); ++i)
 		{
 			pool[i].print_genotype(of); 
+			of << std::endl;
 		}
 	    of.close(); 
 	}
@@ -268,6 +277,7 @@ public:
 		for (int i = 0; i < pool.size(); ++i)
 		{
 			pool[i].print_phenotype(of); 
+			of << std::endl;
 		}
 	    of.close(); 
 	}
