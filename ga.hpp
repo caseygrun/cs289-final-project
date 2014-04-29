@@ -75,11 +75,15 @@ public:
 	}
 
 	void mutate() {
-		float mutation_frequency = 0.1;
+		float mutation_frequency = 0.01;
 		int mutations = mutation_frequency * genome_size;
 		for (int i = 0; i < mutations; ++i)
 		{
-			int j = rand() * genome_size / RAND_MAX;
+			double jjj = RAND_MAX;
+			jjj = rand() / jjj;
+			int j = jjj * genome_size;
+			
+			//std::cout << j << std::endl;
 			sequence.set(j,rand()%2);
 		}
 	}
@@ -91,11 +95,18 @@ public:
 
 	Simple_Genome recombine(Simple_Genome partner) {
 		std::bitset<genome_size> seq;
-		for (int i = 0; i < genome_size/2; ++i)
+
+		//int cross_pos = rand() * genome_size / RAND_MAX;
+		double jjj = RAND_MAX;
+		jjj = rand() / jjj;
+		int cross_pos = jjj * genome_size;
+
+		//std::cout << cross_pos << "\n";
+		for (int i = 0; i < cross_pos; ++i)
 		{
 			seq.set(i,sequence[i]);
 		}
-		for (int i = genome_size/2; i < genome_size; ++i)
+		for (int i = cross_pos; i < genome_size; ++i)
 		{
 			seq.set(i,partner.sequence[i]);
 		}
