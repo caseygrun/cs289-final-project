@@ -211,6 +211,9 @@ protected:
 	// the number of genomes that should be new in each generation
 	int new_generation_size;
 
+	// the number of fittest genomes that should be not be mutated in each generation
+	int pure_generation_size;
+
 	// number of generations elapsed
 	int generation_counter;
 
@@ -243,10 +246,16 @@ public:
 		// number of species that will be allowed to survive
 		int generation_size = max_generation_size;
 
-		// mutate and age each genome in the gene pool
-		for (int i = 0; i < pool_size; ++i) 
+		// mutate and age some genomes in the gene pool
+		for (int i = pure_generation_size; i < pool_size; ++i) 
 		{
 			pool[i].mutate();
+			pool[i].age++;
+		}
+
+		// age the pure too
+		for (int i = 0; i <= pure_generation_size; ++i) 
+		{	
 			pool[i].age++;
 		}
 
@@ -284,9 +293,6 @@ public:
 		{
 			reinitialize_portion(i);
 		}
-
-
-
 
 		// reinit old
 		for (int i = 0; i < pool_size; ++i)
@@ -369,13 +375,13 @@ public:
 	    of.close(); 
 	}
 
-	GeneticAlgorithm(int _ps = 100, int _gs = 50, int _ns = 5) : pool_size(_ps), max_generation_size(_gs), new_generation_size(_ns), pool(_ps), fitness(_ps) {
+	GeneticAlgorithm(int _ps = 100, int _gs = 50, int _ns = 5, int _pure = 1) : pool_size(_ps), max_generation_size(_gs), new_generation_size(_ns), pure_generation_size(_pure), pool(_ps), fitness(_ps) {
 		generation_counter = 0;
 		max_lifetime = 10;
 		max_generations = 100;
 	}
 
-	GeneticAlgorithm(std::string targ, int _ps = 100, int _gs = 50, int _ns = 5) : pool_size(_ps), max_generation_size(_gs), new_generation_size(_ns), pool(_ps), fitness(_ps), target(targ) {
+	GeneticAlgorithm(std::string targ, int _ps = 100, int _gs = 50, int _ns = 5, int _pure = 1) : pool_size(_ps), max_generation_size(_gs), new_generation_size(_ns), pure_generation_size(_pure), pool(_ps), fitness(_ps), target(targ) {
 		generation_counter = 0;
 		max_lifetime = 10;
 		max_generations = 100;
