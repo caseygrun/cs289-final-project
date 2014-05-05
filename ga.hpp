@@ -137,6 +137,7 @@ public:
 		} 
 	}
 	Simple_Genome(std::string targ) {
+		
 		target = std::bitset<genome_size>(targ);
 
 		int rate_for_one = rand() % 100;
@@ -233,12 +234,17 @@ public:
 			} else {
 				pool[i] = genome_T();
 			}
+		//std::cout << target << "\n";
+
+
 		}
 	}
 
 	void reinitialize_portion(int pos) {
 
-		pool[pos] = genome_T();
+		//std::cout << target << "\n";
+
+		pool[pos] = genome_T(target);
 	}
 
 	void generation() {
