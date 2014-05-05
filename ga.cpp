@@ -26,7 +26,13 @@ int main(int argc, char* argv[]) {
 	}
 
 	// set the target state of the CA here
-	GeneticAlgorithm< CA_Genome<base_genome_size> > ga("0001000100010001000");
+	//GeneticAlgorithm< CA_Genome<base_genome_size> > ga("0001000100010001000");
+	//GeneticAlgorithm< CA_Genome<base_genome_size> > ga("0101000011101000011101100110101100000010110011010010111010001001110001000000000010110001100111000110");
+	//GeneticAlgorithm< CA_Genome<base_genome_size> > ga("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+
+        //  GeneticAlgorithm< CA_Genome<base_genome_size> > ga("1111111111000000000011111111110000000000111111111100000000001111111111000000000011111111110000000000");
+          GeneticAlgorithm< CA_Genome<base_genome_size> > ga("1111111111000000000011111111110000000000111111111100000000001111111111000000000011111111110000000000");
+
 	ga.initialize();
 
 	int generation = 0;
@@ -44,6 +50,7 @@ int main(int argc, char* argv[]) {
 		std::cout << "------------------------------------------------------------" << std::endl;
 		ga.generation();
 		generation++;
+		
 	} while(!ga.stop());
 
 	std::vector<CA_Genome<base_genome_size> > candidates = ga.candidates();

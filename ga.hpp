@@ -79,9 +79,9 @@ public:
 		int mutations = mutation_frequency * genome_size;
 		for (int i = 0; i < mutations; ++i)
 		{
-			double jjj = RAND_MAX;
-			jjj = rand() / jjj;
-			int j = jjj * genome_size;
+			double k = RAND_MAX;
+			k = rand() / k;
+			int j = k * genome_size;
 			
 			//std::cout << j << std::endl;
 			sequence.set(j,rand()%2);
@@ -96,10 +96,9 @@ public:
 	Simple_Genome recombine(Simple_Genome partner) {
 		std::bitset<genome_size> seq;
 
-		//int cross_pos = rand() * genome_size / RAND_MAX;
-		double jjj = RAND_MAX;
-		jjj = rand() / jjj;
-		int cross_pos = jjj * genome_size;
+		double k = RAND_MAX;
+		k = rand() / k;
+		int cross_pos = k * genome_size;
 
 		//std::cout << cross_pos << "\n";
 		for (int i = 0; i < cross_pos; ++i)
@@ -124,16 +123,32 @@ public:
 
 
 	Simple_Genome() {
+
+		int rate_for_one = rand() % 100;
+		int my_rate = 0; 
+
 		for (int i = 0; i < genome_size; ++i)
 		{
-			sequence.set(i,rand()%2);	
+			my_rate = rand() % 100;
+			if(my_rate > rate_for_one)
+			{
+				sequence.set(i,1);	
+			}
 		} 
 	}
 	Simple_Genome(std::string targ) {
 		target = std::bitset<genome_size>(targ);
+
+		int rate_for_one = rand() % 100;
+		int my_rate = 0; 
+		
 		for (int i = 0; i < genome_size; ++i)
 		{
-			sequence.set(i,rand()%2);	
+			my_rate = rand() % 100;
+			if(my_rate > rate_for_one)
+			{
+				sequence.set(i,1);	
+			}
 		} 
 	}
 	Simple_Genome(std::bitset<genome_size> seq) {
@@ -193,6 +208,9 @@ protected:
 	// the number of genomes that should be preserved in each generation
 	int max_generation_size;
 
+	// the number of genomes that should be new in each generation
+	int new_generation_size;
+
 	// number of generations elapsed
 	int generation_counter;
 
@@ -215,6 +233,15 @@ public:
 		}
 	}
 
+	void reinitialize_portion(int pos) {
+
+			if(target.length() > 0) {
+				pool[pos] = genome_T(target);
+			} else {
+				pool[pos] = genome_T();
+			}
+	}
+
 	void generation() {
 
 		// number of species that will be allowed to survive
@@ -227,18 +254,20 @@ public:
 			pool[i].age++;
 		}
 
-		// evaluate fitness
+
+		//eval fitness
 		for (int i = 0; i < pool_size; ++i)
 		{
-			if(pool[i].age > max_lifetime) {
-				pool[i].kill();
-			} else {
-				fitness[i] = pool[i].fitness(pool[i].phenotype());
-			}
+			fitness[i] = pool[i].fitness(pool[i].phenotype());
+		
 		}
+
+
+
 
 		// sort the first `generation_size` elements in order of decreasing
 		// fitness, according to the > operator
+
 		std::partial_sort(pool.begin(), pool.begin() + generation_size, pool.end(), std::greater<genome_T>());
 
 		// allow the top `generation_size` elements to recombine
@@ -252,6 +281,18 @@ public:
 
 			pool[i] = static_cast<genome_T>(male.recombine(female));
 		}
+
+		// reinit old
+		for (int i = 0; i < pool_size; ++i)
+		{
+			if(pool[i].age > max_lifetime) {
+				pool[i].kill();
+				//reinitialize_portion(i);
+			}	
+		}
+
+
+
 		generation_counter++;
 	};
 	std::vector<genome_T> candidates() {
@@ -322,13 +363,13 @@ public:
 	    of.close(); 
 	}
 
-	GeneticAlgorithm(int _ps = 100, int _gs = 50) : pool_size(_ps), max_generation_size(_gs), pool(_ps), fitness(_ps) {
+	GeneticAlgorithm(int _ps = 100, int _gs = 50, int _ns = 5) : pool_size(_ps), max_generation_size(_gs), new_generation_size(_ns), pool(_ps), fitness(_ps) {
 		generation_counter = 0;
 		max_lifetime = 10;
 		max_generations = 100;
 	}
 
-	GeneticAlgorithm(std::string targ, int _ps = 100, int _gs = 50) : pool_size(_ps), max_generation_size(_gs), pool(_ps), fitness(_ps), target(targ) {
+	GeneticAlgorithm(std::string targ, int _ps = 100, int _gs = 50, int _ns = 5) : pool_size(_ps), max_generation_size(_gs), new_generation_size(_ns), pool(_ps), fitness(_ps), target(targ) {
 		generation_counter = 0;
 		max_lifetime = 10;
 		max_generations = 100;
