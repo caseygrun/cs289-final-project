@@ -25,7 +25,7 @@ template <int genome_size>
 std::ostream& print_bitset_tsv(std::ostream& os, const std::bitset<genome_size> &seq){
     for (int i = 0; i < genome_size; i++)
     {
-        os << seq[i] << "\t";
+        os << seq[i] << "";
     }
     return os;
 }
@@ -72,14 +72,14 @@ std::bitset<genome_size> run_ca (std::bitset<genome_size> x, bool chatter=false)
     n = genome_size;
 
     // step_num are the rows
-    step_num = 100;
+    step_num = 1;
 
     std::bitset<genome_size> x_old;
 
     // print initial conditions
     if(chatter) {
         print_bitset<genome_size>(std::cout, x);
-        std::cout << "\t->\t";
+        std::cout << "->";
     }
 
     // run automaton
