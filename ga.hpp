@@ -235,11 +235,7 @@ public:
 
 	void reinitialize_portion(int pos) {
 
-			if(target.length() > 0) {
-				pool[pos] = genome_T(target);
-			} else {
-				pool[pos] = genome_T();
-			}
+		pool[pos] = genome_T();
 	}
 
 	void generation() {
@@ -271,7 +267,7 @@ public:
 		std::partial_sort(pool.begin(), pool.begin() + generation_size, pool.end(), std::greater<genome_T>());
 
 		// allow the top `generation_size` elements to recombine
-		for (int i = generation_size; i < pool_size; ++i)
+		for (int i = generation_size; i < pool_size - new_generation_size; ++i)
 		{
 			int male_j   = rand() % generation_size;
 			int female_j = rand() % generation_size;
@@ -282,12 +278,22 @@ public:
 			pool[i] = static_cast<genome_T>(male.recombine(female));
 		}
 
+
+		// add some new genomes
+		for (int i = pool_size; i >= pool_size - new_generation_size; i--)
+		{
+			reinitialize_portion(i);
+		}
+
+
+
+
 		// reinit old
 		for (int i = 0; i < pool_size; ++i)
 		{
 			if(pool[i].age > max_lifetime) {
 				pool[i].kill();
-				//reinitialize_portion(i);
+				reinitialize_portion(i);	
 			}	
 		}
 
