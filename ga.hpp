@@ -240,12 +240,6 @@ public:
 		}
 	}
 
-	void reinitialize_portion(int pos) {
-
-		//std::cout << target << "\n";
-
-		pool[pos] = genome_T(target);
-	}
 
 	void generation() {
 
@@ -259,14 +253,14 @@ public:
 			pool[i].age++;
 		}
 
-		// age the pure too
+		// age the non mutated portion
 		for (int i = 0; i <= pure_generation_size; ++i) 
 		{	
 			pool[i].age++;
 		}
 
 
-		//eval fitness
+		// eval fitness
 		for (int i = 0; i < pool_size; ++i)
 		{
 			fitness[i] = pool[i].fitness(pool[i].phenotype());
@@ -282,7 +276,7 @@ public:
 		std::partial_sort(pool.begin(), pool.begin() + generation_size, pool.end(), std::greater<genome_T>());
 
 		// allow the top `generation_size` elements to recombine
-		for (int i = generation_size; i < pool_size - new_generation_size; ++i)
+		for (int i = pool_size - generation_size; i < pool_size - new_generation_size; ++i)
 		{
 			int male_j   = rand() % generation_size;
 			int female_j = rand() % generation_size;
@@ -295,17 +289,23 @@ public:
 
 
 		// add some new genomes
-		for (int i = pool_size; i >= pool_size - new_generation_size; i--)
+		
+		for (int i = pool_size - new_generation_size; i < pool_size; ++i)
 		{
-			reinitialize_portion(i);
+			pool[i] = genome_T(target);
+			//std::cout << pool[i].target << "\n";
+
 		}
 
-		// reinit old
+
+
+
+
+		// move down old
 		for (int i = 0; i < pool_size; ++i)
 		{
 			if(pool[i].age > max_lifetime) {
 				pool[i].kill();
-				reinitialize_portion(i);	
 			}	
 		}
 
@@ -381,13 +381,15 @@ public:
 	    of.close(); 
 	}
 
-	GeneticAlgorithm(int _ps = 100, int _gs = 50, int _ns = 5, int _pure = 1) : pool_size(_ps), max_generation_size(_gs), new_generation_size(_ns), pure_generation_size(_pure), pool(_ps), fitness(_ps) {
+	GeneticAlgorithm(int _ps = 100, int _gs = 50, int _ns = 10, int _pure = 2) : pool_size(_ps), max_generation_size(_gs), new_generation_size(_ns), pure_generation_size(_pure), pool(_ps), fitness(_ps) {
 		generation_counter = 0;
 		max_lifetime = 10;
 		max_generations = 100;
 	}
 
-	GeneticAlgorithm(std::string targ, int _ps = 100, int _gs = 50, int _ns = 5, int _pure = 1) : pool_size(_ps), max_generation_size(_gs), new_generation_size(_ns), pure_generation_size(_pure), pool(_ps), fitness(_ps), target(targ) {
+	GeneticAlgorithm(std::string targ, int _ps = 100, int _gs = 50, int _ns = 10, int _pure =2) : pool_size(_ps), max_generation_size(_gs), new_generation_size(_ns), pure_generation_size(_pure), pool(_ps), fitness(_ps), target(targ) {
+		//std::cout << targ << "\n";
+
 		generation_counter = 0;
 		max_lifetime = 10;
 		max_generations = 100;

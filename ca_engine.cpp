@@ -72,7 +72,7 @@ std::bitset<genome_size> run_ca (std::bitset<genome_size> x, bool chatter=false)
     n = genome_size;
 
     // step_num are the rows
-    step_num = 100;
+    step_num = 50;
 
     std::bitset<genome_size> x_old;
 
