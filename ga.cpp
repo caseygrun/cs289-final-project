@@ -26,28 +26,42 @@ int main(int argc, char* argv[]) {
 	}
 
 	// set the target state of the CA here
-	//GeneticAlgorithm< CA_Genome<base_genome_size> > ga("0001000100010001000");
-	//GeneticAlgorithm< CA_Genome<base_genome_size> > ga("0101000011101000011101100110101100000010110011010010111010001001110001000000000010110001100111000110");
-	//GeneticAlgorithm< CA_Genome<base_genome_size> > ga("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+	
+        std::string target =
 
-          GeneticAlgorithm< CA_Genome<base_genome_size> > ga("11111111111111111111111111111111111111111111111111000000000000000000000000000000000000000000000000000");
-        //GeneticAlgorithm< CA_Genome<base_genome_size> > ga("1111111111000000000011111111110000000000111111111100000000001111111111000000000011111111110000000000");
+//      "0101000011101000011101100110101100000010110011010010111010001001110001000000000010110001100111000110";
+        "0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101";
+//      "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+//      "1111111111111111111111111111111111111111111111111100000000000000000000000000000000000000000000000000";
+//      "1111111111000000000011111111110000000000111111111100000000001111111111000000000011111111110000000000";
+
+
+        int pool_size = 100;
+        int gen_size = 50;
+        int new_size = 10;
+        int pure_size = 2;
+
+        GeneticAlgorithm<CA_Genome<base_genome_size> > ga(target, pool_size, gen_size, new_size, pure_size);
+
+
+
 
 	ga.initialize();
 
 	int generation = 0;
 	do {
 		// make output filenames
-		std::ostringstream genotype_filename; genotype_filename << output_dir <<  "genotypes_" << generation << ".csv";
-		std::ostringstream phenotype_filename; phenotype_filename << output_dir <<  "phenotypes_" << generation << ".csv";
-		std::ostringstream fitness_filename; fitness_filename << output_dir << "fitnesses_" << generation << ".csv";
+		//std::ostringstream genotype_filename; genotype_filename << output_dir <<  "genotypes_" << generation << ".csv";
+		//std::ostringstream phenotype_filename; phenotype_filename << output_dir <<  "phenotypes_" << generation << ".csv";
+		//std::ostringstream fitness_filename; fitness_filename << output_dir << "fitnesses_" << generation << ".csv";
 
-		ga.print_genotypes(genotype_filename.str());
-		ga.print_phenotypes(phenotype_filename.str());
-		ga.print_fitnesses(fitness_filename.str());
+		//ga.print_genotypes(genotype_filename.str());
+		//ga.print_phenotypes(phenotype_filename.str());
+		//ga.print_fitnesses(fitness_filename.str());
 
+		std::cout << generation << " ";
 		ga.print_fitness_stats();
-		std::cout << "------------------------------------------------------------" << std::endl;
+		//std::cout << "------------------------------------------------------------" << std::endl;
 		ga.generation();
 		generation++;
 		
