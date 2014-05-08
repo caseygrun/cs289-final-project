@@ -34,6 +34,11 @@
 \maketitle
 
 % =============================================================================
+\section{Abstract}
+
+Biological systems are able to develop exquisitely complex patterns; the existance of very simple computer programs that can produce highly complex behavior suggest that the rules underlying these natural pattern formation processes may be very simple. In this work, we attempt to use an evolutionary algorithm to explore the space of initial conditions for an elementary cellular automaton (Rule 110), known to be Turing complete. We show that, despite the fact that the mapping between ``genotypes'' (initial conditions of a cellular automaton) and ``phenotypes'' (final states of the automaton) is complex, regions of local smoothness exist, and very simple patterns can be evolved by selection pressure. These results suggest that certain problems, despite having complicated genotype-to-phenotype mappings, may still be amenable to solutions by genetic algorithms if a fitness landscape can be formulated that is locally smooth. Finally, we discuss the applicability of these results to biological pattern-formation and general evolutionary processes.
+
+% =============================================================================
 \section{Introduction}
 
 Elementary two-dimensional cellular automata are simple computational programs defined by a rule set and seeded with an initial condition state.  The rule set determines the current value of a cell given a local neighborhood of previously computed cell states.  The initial condition space can significantly impact the immediate computational context, drastically affect the overall state of the automata during computation, and ultimately determine the diversity of output states for a given fixed rule set and output definition.
