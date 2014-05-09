@@ -6,6 +6,7 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{graphicx}
+\usepackage{listings}
 
 % commands
 \newcommand{\set}[1]{\left\{#1\right\}}
@@ -66,6 +67,30 @@ In this paper, we develop a simulator for Rule 110 cellular automata and a gener
 % -----------------------------------------------------------------------------
 \subsection{Cellular Automata}
 % TODO: Alex
+Although cellular automata have been implemented before in packages such as Mathematica, we chose to implement a basic two-dimensional cellular automata in C++ from the ground up.  Our choice to build our own version was based on considerations for performance and ease of parameterization.  We wanted to avoid the overhead of interfacing our genetic algorithm with another stand-alone automata that may introduce delays in frequent instantiation.  In our production system used for simulation, a genome size of 100 bits, using a population or pool size of 100 individuals, executing the cellular automata for 100 steps, and while operating under our full genetic algorithm for 100 generations, completed processing in around one minute.  This relatively quick turnaround, however, increases to five minutes with a genome size of 1000 bits running for 100 generations, and to just under an hour for a 1000 bit genome running for 1000 generations.  In our running automata, update decisions for a current generation are computed in simple way of explicitly determining the previous time point neighborhood.
+
+For each $i \in I$, where $I$ is the genome size:
+
+\lstset{language=C++,basicstyle=\footnotesize}
+\begin{lstlisting}{caption=Test}
+
+ // previous 111 110 101 100 011 010 001 000
+ // new state 0 1 1 0 1 1 1 0
+
+if(
+  (w[i-1]==0 && w[i]==0 && w[i+1]==1) ||
+  (w[i-1]==0 && w[i]==1 && w[i+1]==0) ||
+  (w[i-1]==0 && w[i]==1 && w[i+1]==1) ||
+  (w[i-1]==1 && w[i]==0 && w[i+1]==1) ||
+  (w[i-1]==1 && w[i]==1 && w[i+1]==0))
+
+{  x[i] = 1; } else { x[i] = 0; }
+
+\end{lstlisting}
+
+...where $x$ is the current vector and $w$ is the previous time step vector.  We primarily used text based output of our genotypes and final automata state (phenotypes) to rapidly prototype and debug our system.  Evaluation of phenotypes was simplified in our system since the current state of the automata is already in memory and need not be retrieved from a stand-alone package.  Performance gains are likely possible with optimizations to our core update algorithm, since it explicitly queries the previous time step neighborhood for each new cell, leading to redundant calls for roughly 2/3 of the previous time step vector.  Utilization of efficient data structures such as quad trees might be an additional way to speed up the automata engine portion of our system.
+
+
 
 % -----------------------------------------------------------------------------
 \subsection{Evolutionary Algorithm}
@@ -118,7 +143,34 @@ The correlations $\rho$ serve as measures of smoothness, because in a smooth lan
 % -----------------------------------------------------------------------------
 \subsection{Evolutionary Pattern Formation}
 
-% TODO: Alex
+Our initial simulations used a target of all 0's to get a feel for the evolvability of input conditions for our cellular automata.  By running our automata for only one step, we tuned the performance of the genetic algorithm to find phenotypes that were very close to our blank target.  We introduced several improvements our system performance toward reaching an all blank input condition that results in a blank automata.  In condition to the features we continually improved in the genetic algorithm, such as random cross over position, we also added a way to protect a small number of the top performing genotypes from mutation.  We found that when mutation affects all genotypes, arriving at a initial condition of all zeroes is nearly impossible.  Protecting several genomes from mutation helped our system arrive at blank input states.  Even when running for 100 steps, nearly all sampled simulations were able to find the all blank initial condition for the blank target.
+
+We next turned our attention to varying target patterns.  Three new patterns were chosen, which we call: alternative, half, and wave.  The alternating pattern presents a series of one set bit (a 1) followed by one 0 bit, such as 1010101010.  The half pattern presents half of the phenotype as 1's and the other half 0's.  And the wave pattern presents a series of ten 1 bits followed by ten 0 bits for the length of the desired phenotype.  Using the half pattern and a relatively short cellular automata runtime of 10 steps, we investigated the effect of generation time, or rounds of evolution, on the maximal fitness of evolved input states (Fig. \ref{fig:sim1}).  As expected, longer generation times had the increased probability to find better performing genotypes.
+
+Using long-running simulations of 1000 generations, we looked for fitness differences in the total number of columns of our cellular automata, or variable genome sizes (since the genotype and phenotype are the same size in our system).  Interestingly, larger genome sizes performed worse at evolving our new targets than the genome sizes for 10 and 50 (Fig. \ref{fig:sim2}).  Furthermore, we asked how increasing the pool size, or number of individual genomes in the population, affected performance.  Larger pool sizes has increased probability of having highly fit genotypes out of the gate, and generally had steeper slopes of fitness gains per generation (Fig. \ref{fig:sim3}).  By the last generation, larger pool sizes maintained an advantage of the smaller pools.
+
+\begin{figure*}
+	\includegraphics[width=\textwidth]{figures/sim/figure_1small.pdf}
+	\caption{Affect of generation length for three attempts to find the "half" target. Identically parameterized runs differing by the number of rounds of evolution (generations).  The genome size is 100 bits, pool size of 100 individuals, run for 10 cellular automata steps.  The "half" target consists of half 1's and half 0's.  The y-axis shows the number of bits in the final condition that differ from the target.  Longer generation times are more likely to have bursts of improvement, such as between steps 100 and 200 for the longer running population.
+  }
+	\label{fig:sim1}
+\end{figure*}
+
+\begin{figure*}
+	\includegraphics[width=\textwidth]{figures/sim/figure_2small.pdf}
+	\caption{Affect of genome size on performance of different targets.  Five different genome size lengths were compared to three targets: alternating, half, and wave.  Larger genome sizes generally have more difficulty resolving the target after 10 steps of automata.  All simulations were run for 1000 generations.  The y-axis reflects the corresponding percentage of difference between the best performing phenotype to target for each generation.
+  }
+	\label{fig:sim2}
+\end{figure*}
+
+\begin{figure*}
+	\includegraphics[width=\textwidth]{figures/sim/figure_3small.pdf}
+	\caption{Affect of pool size on performance of different targets.  Varying population or pool sizes were compared to the three targets.  Larger pool sizes generally have more success resolving the target after 10 steps of automata.  All simulations were run for 1000 generations.  The genome size used was 50 bits.
+  }
+	\label{fig:sim3}
+\end{figure*}
+
+
 
 % -----------------------------------------------------------------------------
 \subsection{Fitness Landscape Smoothness}
@@ -145,7 +197,9 @@ Second, when examining plots of genome distances $\set{\hat{g}_{i,j}}$ vs. fitne
 % =============================================================================
 \section{Discussion}
 
-% TODO: discuss evolutionary pattern formation results
+
+All simulations were capable of finding a highly fit genotype to match a blank target, no matter how many steps of the automata were run.  Performance for the other targets, however, was more difficult for the system to evolve than expected.  For the alternating pattern, larger pool sizes generally and longer generation times had little effect on performance, indicating it just be a really hard target.  For the half pattern, most simulations continued to make progress over very long runs but benefited from a smaller genotype size.  The finding that a smaller automata space improves performance may be an underlying feature of the rule set.  As population sizes increase, so does the probability of finding a more fit genotype; however, longer rounds of evolution can help make up this advantage, as shown in the half pattern case where even a pool size of 50 approaches the max fitness of 1000 after hundreds of rounds.  A thorough investigation of the trade-offs between large populations and long generation lengths under limited resources might be highly beneficial for future studies.
+
 
 The question of fitness landscape smoothness is central to the question of whether a particular search problem is amenable to solution by an evolutionary algorithm at all. We observe that the fitness landscape defined by our evolutionary processes, while not generally smooth, has regions of local smoothness. On the one hand, this is surprising, given the chaotic nature of Rule 110 and the undecidable mapping between inputs and outputs for generalized 110 processes (e.g. cellular automata running Rule 110, whose stopping conditions are determined by automaton output). On the other hand, biological systems are constantly solving an evolutionary problem with a highly non-smooth fitness landscape---many random mutations are lethal or result in drastic changes in fitness. Epistasis (multiple mutations having non-additive effects) and pleiotropy (individual genes influencing multiple, unrelated phenotypic traits) create the potential for significant jumps in fitness with small mutations to a genome. \cite{Ostman:2012iq} However, certain properties of the genotype-to-phenotype mapping (for instance, degeneracy in the genetic code, allowing for mutations that produce identical or similar peptide sequences) allow for a high degree of local smoothness.  Further, features of the selection process allow populations of various sizes to cross fitness valleys, even in the absence of sexual reproduction. \cite{Weissman:2009dh} Our observation suggests that certain search problems, despite having a complex mapping from genotype-to-phenotype, may have simple formulations that allow for ``smooth enough'' fitness landscapes for evolutionary search. 
 
